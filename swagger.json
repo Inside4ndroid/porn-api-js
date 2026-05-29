@@ -1,0 +1,404 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Eporner & XHamster API",
+    "description": "Unofficial multi-provider adult video API. Exposes video details and search for **EPorner** (via official API v2) and **XHamster** (via HTML scraping).",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Inside4ndroid Studios Ltd"
+    }
+  },
+  "tags": [
+    {
+      "name": "EPorner",
+      "description": "EPorner video details and search via the official eporner API v2"
+    },
+    {
+      "name": "XHamster",
+      "description": "XHamster video details and search via HTML scraping"
+    }
+  ],
+  "paths": {
+    "/api/eporner/details/{id}": {
+      "get": {
+        "tags": ["EPorner"],
+        "operationId": "getEpornerDetails",
+        "summary": "Get EPorner video details and sources",
+        "description": "Returns full video metadata along with all available MP4 source URLs for a given EPorner video ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The EPorner video ID (e.g. `Nxm27jfWQ98`)",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "thumbsize",
+            "in": "query",
+            "required": false,
+            "description": "Thumbnail size",
+            "schema": {
+              "type": "string",
+              "enum": ["small", "medium", "big"],
+              "default": "medium"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video details and sources",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EpornerDetailsResponse" },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "title": "Example Video Title",
+                    "id": "Nxm27jfWQ98",
+                    "image": "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17220615/9_240.jpg",
+                    "duration": "12:34",
+                    "views": "1500000",
+                    "rating": "87",
+                    "uploaded": "2024-01-15",
+                    "tags": ["amateur", "hd"],
+                    "source": "https://www.eporner.com/embed/Nxm27jfWQ98/",
+                    "sources": [
+                      { "quality": "1080p", "url": "https://vid-cdn.eporner.com/.../1080p.mp4" },
+                      { "quality": "720p",  "url": "https://vid-cdn.eporner.com/.../720p.mp4" }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/eporner/search/{query}": {
+      "get": {
+        "tags": ["EPorner"],
+        "operationId": "searchEporner",
+        "summary": "Search EPorner videos",
+        "description": "Returns a paginated list of EPorner videos matching the search query. Use `all` as the query to return all videos.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "path",
+            "required": true,
+            "description": "Search string. Use `all` to return all videos.",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "per_page",
+            "in": "query",
+            "required": false,
+            "description": "Results per page (1–1000)",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 1000, "default": 30 }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Page number (1–1000000)",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 1000000, "default": 1 }
+          },
+          {
+            "name": "thumbsize",
+            "in": "query",
+            "required": false,
+            "description": "Thumbnail size",
+            "schema": {
+              "type": "string",
+              "enum": ["small", "medium", "big"],
+              "default": "medium"
+            }
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "description": "Sort order",
+            "schema": {
+              "type": "string",
+              "enum": ["latest", "longest", "shortest", "top-rated", "most-popular", "top-weekly", "top-monthly"],
+              "default": "latest"
+            }
+          },
+          {
+            "name": "gay",
+            "in": "query",
+            "required": false,
+            "description": "Gay content filter: `0` = excluded, `1` = included, `2` = only",
+            "schema": {
+              "type": "string",
+              "enum": ["0", "1", "2"],
+              "default": "0"
+            }
+          },
+          {
+            "name": "lq",
+            "in": "query",
+            "required": false,
+            "description": "Low quality filter: `0` = excluded, `1` = included, `2` = only",
+            "schema": {
+              "type": "string",
+              "enum": ["0", "1", "2"],
+              "default": "1"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated search results",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EpornerSearchResponse" },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "link": "https://www.eporner.com/video/Nxm27jfWQ98/example-title/",
+                      "id": "Nxm27jfWQ98",
+                      "title": "Example Video Title",
+                      "image": "https://static-ca-cdn.eporner.com/thumbs/static4/1/17/172/17220615/9_240.jpg",
+                      "duration": "12:34",
+                      "views": "1500000",
+                      "video": "https://www.eporner.com/embed/Nxm27jfWQ98/"
+                    }
+                  ],
+                  "page": 1,
+                  "total_pages": 50,
+                  "total_count": 1500
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/xhamster/details/{id}": {
+      "get": {
+        "tags": ["XHamster"],
+        "operationId": "getXhamsterDetails",
+        "summary": "Get XHamster video details and sources",
+        "description": "Scrapes an XHamster video page and returns full metadata plus HLS stream sources for each available quality.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "description": "The XHamster video slug — the full slug segment after `/videos/` in the URL (e.g. `distracted-my-girlfriend-from-playing-with-my-dick-xhfrS3j`)",
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Video details and HLS sources",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/XhamsterDetailsResponse" },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "title": "Example XHamster Video",
+                    "id": "example-video-xhfrS3j",
+                    "image": "https://ic-vt-nss.xhcdn.com/.../hq.1.webp",
+                    "duration": "02:52",
+                    "views": "12710594",
+                    "rating": "100",
+                    "uploaded": "2026-05-28 21:40:16 UTC",
+                    "tags": ["Amateur", "HD"],
+                    "source": "https://xhamster.com/videos/example-video-xhfrS3j",
+                    "sources": [
+                      { "quality": "144p",  "resolution": "256x144",   "url": "https://video-cf.xhcdn.com/.../144p.h264.mp4.m3u8" },
+                      { "quality": "240p",  "resolution": "426x240",   "url": "https://video-cf.xhcdn.com/.../240p.h264.mp4.m3u8" },
+                      { "quality": "480p",  "resolution": "854x480",   "url": "https://video-cf.xhcdn.com/.../480p.h264.mp4.m3u8" },
+                      { "quality": "720p",  "resolution": "1280x720",  "url": "https://video-cf.xhcdn.com/.../720p.h264.mp4.m3u8" },
+                      { "quality": "1080p", "resolution": "1920x1080", "url": "https://video-cf.xhcdn.com/.../1080p.h264.mp4.m3u8" },
+                      { "quality": "2160p", "resolution": "3840x2160", "url": "https://video-cf.xhcdn.com/.../2160p.h264.mp4.m3u8" }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    },
+    "/api/xhamster/search/{query}": {
+      "get": {
+        "tags": ["XHamster"],
+        "operationId": "searchXhamster",
+        "summary": "Search XHamster videos",
+        "description": "Scrapes XHamster search results and returns a list of video thumbnails with metadata.",
+        "parameters": [
+          {
+            "name": "query",
+            "in": "path",
+            "required": true,
+            "description": "Search string (e.g. `bbw`)",
+            "schema": { "type": "string" }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "description": "Page number",
+            "schema": { "type": "integer", "minimum": 1, "default": 1 }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Search results",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/XhamsterSearchResponse" },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "link": "https://xhamster.com/videos/example-video-xhfrS3j",
+                      "id": "example-video-xhfrS3j",
+                      "title": "Example XHamster Video",
+                      "image": "https://ic-vt-nss.xhcdn.com/.../hq.1.webp",
+                      "duration": "02:52",
+                      "views": "100 views",
+                      "video": "https://xhamster.com/embed/xhfrS3j"
+                    }
+                  ],
+                  "source": "https://xhamster.com/search/bbw?page=1"
+                }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/NotFound" }
+        }
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "NotFound": {
+        "description": "Not found or upstream rate limit reached",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status":  { "type": "integer", "example": 404 },
+                "return":  { "type": "string",  "example": "Oops reached rate limit of this api" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "schemas": {
+      "Source": {
+        "type": "object",
+        "properties": {
+          "quality": { "type": "string", "example": "720p" },
+          "url":     { "type": "string", "format": "uri" }
+        }
+      },
+      "HLSSource": {
+        "type": "object",
+        "properties": {
+          "quality":    { "type": "string", "example": "720p" },
+          "resolution": { "type": "string", "example": "1280x720" },
+          "url":        { "type": "string", "format": "uri" }
+        }
+      },
+      "EpornerDetailsData": {
+        "type": "object",
+        "properties": {
+          "title":    { "type": "string" },
+          "id":       { "type": "string" },
+          "image":    { "type": "string", "format": "uri" },
+          "duration": { "type": "string", "example": "12:34" },
+          "views":    { "type": "string", "example": "1500000" },
+          "rating":   { "type": "string", "example": "87" },
+          "uploaded": { "type": "string", "example": "2024-01-15" },
+          "tags":     { "type": "array", "items": { "type": "string" } },
+          "source":   { "type": "string", "format": "uri", "description": "Embed URL" },
+          "sources":  { "type": "array", "items": { "$ref": "#/components/schemas/Source" } }
+        }
+      },
+      "EpornerDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data":    { "$ref": "#/components/schemas/EpornerDetailsData" }
+        }
+      },
+      "EpornerSearchItem": {
+        "type": "object",
+        "properties": {
+          "link":     { "type": "string", "format": "uri" },
+          "id":       { "type": "string" },
+          "title":    { "type": "string" },
+          "image":    { "type": "string", "format": "uri" },
+          "duration": { "type": "string", "example": "12:34" },
+          "views":    { "type": "string", "example": "1500000" },
+          "video":    { "type": "string", "format": "uri", "description": "Embed URL" }
+        }
+      },
+      "EpornerSearchResponse": {
+        "type": "object",
+        "properties": {
+          "success":     { "type": "boolean" },
+          "data":        { "type": "array", "items": { "$ref": "#/components/schemas/EpornerSearchItem" } },
+          "page":        { "type": "integer" },
+          "total_pages": { "type": "integer" },
+          "total_count": { "type": "integer" }
+        }
+      },
+      "XhamsterDetailsData": {
+        "type": "object",
+        "properties": {
+          "title":    { "type": "string" },
+          "id":       { "type": "string" },
+          "image":    { "type": "string", "format": "uri" },
+          "duration": { "type": "string", "example": "02:52", "description": "Duration in seconds (raw from page)" },
+          "views":    { "type": "string", "example": "12710594" },
+          "rating":   { "type": "string", "example": "100" },
+          "uploaded": { "type": "string", "example": "2026-05-28 21:40:16 UTC" },
+          "tags":     { "type": "array", "items": { "type": "string" } },
+          "source":   { "type": "string", "format": "uri", "description": "Canonical video page URL" },
+          "sources":  { "type": "array", "items": { "$ref": "#/components/schemas/HLSSource" } }
+        }
+      },
+      "XhamsterDetailsResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data":    { "$ref": "#/components/schemas/XhamsterDetailsData" }
+        }
+      },
+      "XhamsterSearchItem": {
+        "type": "object",
+        "properties": {
+          "link":     { "type": "string", "format": "uri" },
+          "id":       { "type": "string" },
+          "title":    { "type": "string" },
+          "image":    { "type": "string", "format": "uri" },
+          "duration": { "type": "string", "example": "02:52" },
+          "views":    { "type": "string", "example": "317.3K views" },
+          "video":    { "type": "string", "format": "uri", "description": "Embed URL" }
+        }
+      },
+      "XhamsterSearchResponse": {
+        "type": "object",
+        "properties": {
+          "success": { "type": "boolean" },
+          "data":    { "type": "array", "items": { "$ref": "#/components/schemas/XhamsterSearchItem" } },
+          "source":  { "type": "string", "format": "uri", "description": "The scraped search URL" }
+        }
+      }
+    }
+  }
+}
