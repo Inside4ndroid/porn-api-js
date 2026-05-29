@@ -1,6 +1,6 @@
 {
   "name": "vidsrc-api-v2",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An api that scrapes vidsrc.to and vidsrc.me",
   "main": "index.js",
   "type": "module",
