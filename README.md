@@ -1,4 +1,4 @@
-# eporner-api-js
+# porn-api-js
 
 Unofficial multi-provider adult video REST API built with Node.js and Express. Supports **EPorner** (via the official eporner API v2) and **XHamster** (via HTML scraping + embedded JSON state parsing).
 
